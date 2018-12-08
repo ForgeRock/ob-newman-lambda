@@ -17,18 +17,17 @@
 var newman = require('newman');
 var fs = require('fs');
 let AWS = require('aws-sdk');
+var slack = require('./service/slack.js');
 
 var postman = require('./service/postman.js');
 var monitoring = require('./service/monitoring.js');
 var slack = require('./service/slack.js');
-var async = require('async');
 
 var collectionFilePath = "/tmp/collection.json";
 var environmentFilePath = "/tmp/environment.json";
 
 
 exports.handler = async (event) => {
-
     try {
         console.log("Start the postman monitoring lambda.");
         console.log("Download the environment");
@@ -51,8 +50,19 @@ exports.handler = async (event) => {
         console.log(JSON.stringify(monitoringResult));
         console.log('We now send the monitoring result to the monitoring service');
 
-        await monitoring.postMonitoringResult(postmanResult, monitoringResult);
+        await monitoring.postMonitoringResult(postmanResult, monitoringResult)
+            .then(function(values) {
+            console.log(values);
+            console.log("Send successfully to monitoring service");
+        });;
+        console.log('Wait on slack promises');
+        await Promise.all(slack.promises())
+            .then(function(values) {
+                console.log(values);
+                console.log("Slack messages completed");
+            });
         console.log('Post monitoring completed!');
+
     }
     catch (err) {
         console.log(err);
@@ -79,7 +89,7 @@ runNewman = () => {
             if (err) {
                 console.log("Received an error from newman");
                 console.error(err)
-                slack.hook.send({
+                slack.send({
                     attachments: [
                         {
                             "fallback": err.help,

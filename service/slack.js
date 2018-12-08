@@ -17,6 +17,14 @@
 var SlackWebhook = require('slack-webhook')
 
 var slackWebHook = process.env.slackWebHook;
+var hook = new SlackWebhook(slackWebHook);
+var promises = []
 
-exports.hook = new SlackWebhook(slackWebHook)
+exports.send = function (message) {
+    promises.push(hook.send(message));
+}
+
+exports.promises = function() {
+    return promises;
+}
 

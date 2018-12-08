@@ -54,7 +54,7 @@ exports.getEnvironment = (environmentFilePath) => {
                 } catch (err) {
                     console.log("Couldn't write the environment into a file");
                     console.error(err)
-                    slack.hook.send({
+                    slack.send({
                         attachments: [
                             {
                                 "fallback": JSON.stringify(err),
@@ -75,7 +75,7 @@ exports.getEnvironment = (environmentFilePath) => {
 
         req.on('error', function (err) {
             console.log('error: ' + err.message);
-            slack.hook.send({
+            slack.send({
                 attachments: [
                     {
                         "fallback": JSON.stringify(err),
@@ -125,7 +125,7 @@ exports.getCollection = (collectionFilePath) => {
                 } catch (err) {
                     console.log("Couldn't write the collection into a file");
                     console.error(err)
-                    slack.hook.send({
+                    slack.send({
                         attachments: [
                             {
                                 "fallback": JSON.stringify(err),
@@ -146,7 +146,7 @@ exports.getCollection = (collectionFilePath) => {
 
         req.on('error', function(err) {
             console.log('error: ' + err.message);
-            slack.hook.send({
+            slack.send({
                 attachments: [
                     {
                         "fallback": JSON.stringify(err),

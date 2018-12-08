@@ -25,7 +25,7 @@ var domain = process.env.domain;
 var monitoringUri = process.env.monitoringUri;
 
 var applicationUsername = process.env.applicationUsername;
-var applicationPassword = process.env.applicationUsername;
+var applicationPassword = process.env.applicationPassword;
 
 exports.convertExecutions = function(timings, executions) {
     console.log('convertExecutions()');
@@ -34,7 +34,9 @@ exports.convertExecutions = function(timings, executions) {
 
     var requests = [];
     for(var i = 0; i < executions.length; i++) {
-        requests.push(convertExecution(executions[i], time));
+        if (executions[i].response != null) {
+            requests.push(convertExecution(executions[i], time));
+        }
     }
     var monitoringResult = {
         "applicationUuid": applicationUuid,
@@ -89,7 +91,7 @@ exports.postMonitoringResult =
                     console.log(postmanResult.collection)
                     console.log(JSON.stringify(postmanResult.collection.info))
 
-                    slack.hook.send({
+                    slack.send({
                         "text": "Monitoring result for '" + postmanResult.collection.name + "' on environment '" + postmanResult.environment.name + "'",
                         attachments: getAttachment(postmanResult)
                     });
@@ -100,7 +102,7 @@ exports.postMonitoringResult =
             req.on('error', function(err) {
                 console.log('error: ' + err);
 
-                slack.hook.send({
+                slack.send({
                     attachments: [
                         {
                             "fallback": JSON.stringify(err),
@@ -254,7 +256,10 @@ function getFields(postmanResult) {
 
 function convertExecution(execution, time) {
 
-    var duraction = execution.response.responseTime / 1000;
+    var duraction = 0;
+    if (execution.response.responseTime) {
+        duraction = execution.response.responseTime / 1000;
+    }
     return {
         "time": time,
         "method": execution.request.method,
