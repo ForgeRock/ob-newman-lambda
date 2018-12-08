@@ -1,7 +1,7 @@
 {
     "dependencies": {
-        "aws-sdk": ">= 2.0.9",
-        "newman": ">= 1.4.1",
+        "aws-sdk": "^2.373.0",
+        "newman": "^3.9.1",
         "node-uuid": ">= 1.4.1",
         "slack-webhook": "^1.0.0"
     }

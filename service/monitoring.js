@@ -49,70 +49,77 @@ exports.convertExecutions = function(timings, executions) {
     return monitoringResult;
 }
 
-exports.postMonitoringResult = function(collection, environment, postmanResult, monitoringResult) {
-    console.log("rest::postMonitoringResult");
-    var auth = 'Basic ' + Buffer.from(applicationUsername + ':' + applicationPassword).toString('base64');
+exports.postMonitoringResult =
+    (postmanResult, monitoringResult) => {
+        return new Promise((resolve, reject) => {
 
-    var options = {
-        host: monitoringUri,
-        path: "/api/requests",
-        port: '443',
-        //This is the only line that is new. `headers` is an object with the headers to request
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": auth
-        },
-        method: 'POST',
+            console.log("rest::postMonitoringResult");
+            var auth = 'Basic ' + Buffer.from(applicationUsername + ':' + applicationPassword).toString('base64');
 
-    }
+            var options = {
+                host: monitoringUri,
+                path: "/api/requests",
+                port: '443',
+                //This is the only line that is new. `headers` is an object with the headers to request
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": auth
+                },
+                method: 'POST',
 
-    console.log("Send request to :" + JSON.stringify(options))
+            }
 
-    var req = https.request(options, function(res)
-    {
-        var output = '';
-        console.log(options.host + ':' + res.statusCode);
-        res.setEncoding('utf8');
+            console.log("Send request to :" + JSON.stringify(options))
 
-        res.on('data', function (chunk) {
-            output += chunk;
-        });
+            var req = https.request(options, function(res)
+            {
+                var output = '';
+                console.log(options.host + ':' + res.statusCode);
+                res.setEncoding('utf8');
 
-        res.on('end', function() {
-            console.log(JSON.parse(output))
-            console.log("collection")
-            console.log(JSON.stringify(postmanResult.collection))
-            console.log(postmanResult.collection)
-            console.log(JSON.stringify(postmanResult.collection.info))
+                res.on('data', function (chunk) {
+                    output += chunk;
+                });
 
-            slack.hook.send({
-                "text": "Monitoring result for '" + postmanResult.collection.name + "' on environment '" + postmanResult.environment.name + "'",
-                attachments: getAttachment(postmanResult)
+                res.on('end', function() {
+                    console.log(JSON.parse(output))
+                    console.log("collection")
+                    console.log(JSON.stringify(postmanResult.collection))
+                    console.log(postmanResult.collection)
+                    console.log(JSON.stringify(postmanResult.collection.info))
+
+                    slack.hook.send({
+                        "text": "Monitoring result for '" + postmanResult.collection.name + "' on environment '" + postmanResult.environment.name + "'",
+                        attachments: getAttachment(postmanResult)
+                    });
+                    resolve(res);
+                });
             });
-        });
-    });
 
-    req.on('error', function(err) {
-        console.log('error: ' + err);
+            req.on('error', function(err) {
+                console.log('error: ' + err);
 
-        slack.hook.send({
-            attachments: [
-                {
-                    "fallback": JSON.stringify(err),
-                    "color": "#e59400",
-                    "title":  "Yapily monitoring service failed to save the new result",
-                    "text": JSON.stringify(err),
-                    "thumb_url": "https://www.bing.com/th?id=AMMS_c4d30cdeaa288e1673500ed07a376e44&w=110&h=110&c=7&rs=1&qlt=95&cdv=1&pid=16.1",
-                    "footer": "OBRI Monitoring API",
-                    "footer_icon": "https://www.limestonebank.com/assets/content/uPUMtrSe/icon-onlinebanking-2x.png",
-                }
-            ]
-        });
-    });
-    req.write(JSON.stringify(monitoringResult));
+                slack.hook.send({
+                    attachments: [
+                        {
+                            "fallback": JSON.stringify(err),
+                            "color": "#e59400",
+                            "title":  "Yapily monitoring service failed to save the new result",
+                            "text": JSON.stringify(err),
+                            "thumb_url": "https://www.bing.com/th?id=AMMS_c4d30cdeaa288e1673500ed07a376e44&w=110&h=110&c=7&rs=1&qlt=95&cdv=1&pid=16.1",
+                            "footer": "OBRI Monitoring API",
+                            "footer_icon": "https://www.limestonebank.com/assets/content/uPUMtrSe/icon-onlinebanking-2x.png",
+                        }
+                    ]
+                });
+                reject(err);
 
-    req.end();
+            });
+            req.write(JSON.stringify(monitoringResult));
+
+            req.end();
+        })
 };
 
 
