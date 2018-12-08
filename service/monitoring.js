@@ -275,11 +275,8 @@ function convertExecution(execution, time) {
 }
 
 function getUriTemplate(execution) {
-    for(var i = 0; i < execution.request.header.length; i++) {
-        var header = execution.request.header[i];
-        if (header.key == "x-postman-url-template") {
-            return header.value.replace("https://", "");
-        }
+    if (execution.request.headers.get("x-postman-url-template") != null) {
+        return execution.request.headers.get("x-postman-url-template").replace("https://", "");
     }
 
     var uriTemplate = execution.request.url.host[0];
