@@ -1,11 +1,24 @@
+/*
+ *  The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ *  You can obtain a copy of the License at https://forgerock.org/cddlv1-0/. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ *  information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2018 ForgeRock AS.
+ */
+
 var https = require('https');
 var slack = require('./slack.js');
 
 
-
-
 var applicationUuid = process.env.applicationUuid;
-
 var originRegion = process.env.originRegion;
 var institutionId = process.env.institutionId;
 var domain = process.env.domain;
@@ -15,6 +28,8 @@ var applicationUsername = process.env.applicationUsername;
 var applicationPassword = process.env.applicationUsername;
 
 exports.convertExecutions = function(timings, executions) {
+    console.log('convertExecutions()');
+
     var time = new Date(timings.started).toISOString()
 
     var requests = [];
@@ -84,10 +99,10 @@ exports.postMonitoringResult = function(collection, environment, postmanResult, 
         slack.hook.send({
             attachments: [
                 {
-                    "fallback": err,
+                    "fallback": JSON.stringify(err),
                     "color": "#e59400",
                     "title":  "Yapily monitoring service failed to save the new result",
-                    "text": err,
+                    "text": JSON.stringify(err),
                     "thumb_url": "https://www.bing.com/th?id=AMMS_c4d30cdeaa288e1673500ed07a376e44&w=110&h=110&c=7&rs=1&qlt=95&cdv=1&pid=16.1",
                     "footer": "OBRI Monitoring API",
                     "footer_icon": "https://www.limestonebank.com/assets/content/uPUMtrSe/icon-onlinebanking-2x.png",
