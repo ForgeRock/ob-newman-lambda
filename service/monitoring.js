@@ -275,7 +275,7 @@ function convertExecution(execution, time) {
 }
 
 function getUriTemplate(execution) {
-    for(var i = 0; i < execution.request.header; i++) {
+    for(var i = 0; i < execution.request.header.length; i++) {
         var header = execution.request.header[i];
         if (header.key == "x-postman-url-template") {
             return header.value.replace("https://", "");
